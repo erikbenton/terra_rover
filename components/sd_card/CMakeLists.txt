@@ -1,0 +1,11 @@
+idf_component_register(
+    SRCS
+        "sd_mmc_card.c"
+        "sd_card_factory.c"
+        "spi_sd_card.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        vfs
+        fatfs
+)

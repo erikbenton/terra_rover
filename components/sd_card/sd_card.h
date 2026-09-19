@@ -1,0 +1,25 @@
+#ifndef __SD_CARD_H__
+#define __SD_CARD_H__
+
+#include "esp_err.h"
+#include "sd_protocol_types.h"
+
+#define SPI_SD_TYPE "spi_sd"
+#define SD_MMC_TYPE "sdmmc"
+
+typedef struct SD_CARD_STRUCT sd_card_t;
+
+struct SD_CARD_STRUCT
+{
+    sdmmc_card_t *card;
+    esp_err_t (*init)(sd_card_t *self);                                                           // initialize the hardware
+    esp_err_t (*read_line)(sd_card_t *self, const char *path);                                    // read line from file
+    esp_err_t (*read_full_file)(sd_card_t *self, const char *path, char *buffer, long buff_size); // read the entire file
+    esp_err_t (*write_file)(sd_card_t *self, char *path, const char *content);                    // write a line to a file
+    esp_err_t (*unmount)(sd_card_t *self);                                                        // unmount the sd card
+    void *ctx;                                                                                    // any extra context for implementing operations
+};
+
+void sd_card_init(const char *type, sd_card_t *sd_card, void *ctx);
+
+#endif
