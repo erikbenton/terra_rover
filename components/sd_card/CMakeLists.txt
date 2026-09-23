@@ -8,4 +8,5 @@ idf_component_register(
     REQUIRES
         vfs
         fatfs
+        esp_http_server
 )

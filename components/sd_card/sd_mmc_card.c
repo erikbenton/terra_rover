@@ -7,6 +7,7 @@
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 #include "driver/sdmmc_host.h"
+#include "esp_http_server.h"
 
 static const char *TAG = "SDMMC";
 static const char *BASE_PATH = "/store";
@@ -121,6 +122,50 @@ static esp_err_t sd_write_data_file(sd_card_t *self, const char *path, const voi
     return ESP_OK;
 }
 
+static esp_err_t sd_stream_web_files(sd_card_t *self, httpd_req_t *req)
+{
+    char path[600];
+    sprintf(path, "/store/site%s", req->uri);
+
+    char *ext = strrchr(req->uri, '.');
+
+    if (ext)
+    {
+        // set the MIME type
+        if (strcmp(ext, ".css") == 0)
+            httpd_resp_set_type(req, "text/css");
+        if (strcmp(ext, ".js") == 0)
+            httpd_resp_set_type(req, "text/javascript");
+        if (strcmp(ext, ".png") == 0)
+            httpd_resp_set_type(req, "image/png");
+        if (strcmp(ext, ".jpg") == 0)
+            httpd_resp_set_type(req, "image/jpg");
+        if (strcmp(ext, ".svg") == 0)
+            httpd_resp_set_type(req, "image/svg+xml");
+    }
+
+    FILE *file = fopen(path, "r");
+    if (file == NULL)
+    {
+        file = fopen("/store/site/index.html", "r");
+        if (file == NULL)
+        {
+            httpd_resp_send_404(req);
+            return ESP_FAIL;
+        }
+    }
+
+    char buffer[1024];
+    int bytes_read = 0;
+    while ((bytes_read = fread(buffer, sizeof(char), sizeof(buffer), file)) > 0)
+    {
+        httpd_resp_send_chunk(req, buffer, bytes_read);
+    }
+    fclose(file);
+
+    return ESP_OK;
+}
+
 static esp_err_t sd_unmount(sd_card_t *self)
 {
     return esp_vfs_fat_sdcard_unmount(BASE_PATH, self->card);
@@ -134,5 +179,6 @@ void sd_mmc_card_create(sd_card_t *sd_card, void *ctx)
     sd_card->read_line = sd_read_line;
     sd_card->write_str_file = sd_write_file;
     sd_card->write_data_file = sd_write_data_file;
+    sd_card->stream_web_files = sd_stream_web_files;
     sd_card->unmount = sd_unmount;
 }

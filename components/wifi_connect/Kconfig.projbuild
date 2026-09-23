@@ -1,0 +1,11 @@
+menu "Wifi Connect Config"
+
+config WIFI_SSID
+    string "Enter wifi SSID to connect to"
+    default "Wifi SSID not set"
+
+config WIFI_PASSWORD
+    string "Enter wifi password"
+    default "no password"
+
+endmenu
