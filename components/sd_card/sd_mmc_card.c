@@ -41,6 +41,13 @@ static esp_err_t sd_write_file(sd_card_t *self, char *path, const char *content)
 {
     ESP_LOGI(TAG, "writing \"%s\" to %s", content, path);
     FILE *file = fopen(path, "w");
+
+    if (file == NULL)
+    {
+        ESP_LOGE(TAG, "Unable to get a file to write to.");
+        return ESP_FAIL;
+    }
+
     fputs(content, file);
     fclose(file);
 
@@ -51,6 +58,12 @@ static esp_err_t sd_read_full_file(sd_card_t *self, const char *path, char *buff
 {
     ESP_LOGI(TAG, "reading file %s", path);
     FILE *file = fopen(path, "r");
+
+    if (file == NULL)
+    {
+        ESP_LOGE(TAG, "Unable to get file to read.");
+        return ESP_FAIL;
+    }
 
     // determine file length
     fseek(file, 0, SEEK_END);
@@ -74,11 +87,37 @@ static esp_err_t sd_read_line(sd_card_t *self, const char *path)
 {
     ESP_LOGI(TAG, "reading file %s", path);
     FILE *file = fopen(path, "r");
+
+    if (file == NULL)
+    {
+        perror("error opening file");
+        ESP_LOGE(TAG, "Unable to get file to read.");
+        return ESP_FAIL;
+    }
+
     char buffer[100];
     memset(buffer, 0, sizeof(buffer));
     fgets(buffer, 99, file);
     fclose(file);
     ESP_LOGI(TAG, "file contains: %s", buffer);
+    return ESP_OK;
+}
+
+static esp_err_t sd_write_data_file(sd_card_t *self, const char *path, const void *data, size_t data_len)
+{
+    FILE *file = fopen(path, "w");
+
+    if (file == NULL)
+    {
+        perror("error opening file");
+        ESP_LOGE(TAG, "Unable to get a file handle to write to.");
+        fclose(file);
+        return ESP_FAIL;
+    }
+
+    fwrite(data, sizeof(uint8_t), data_len, file);
+    fclose(file);
+
     return ESP_OK;
 }
 
@@ -93,6 +132,7 @@ void sd_mmc_card_create(sd_card_t *sd_card, void *ctx)
     sd_card->init = init_sd_mmc_card;
     sd_card->read_full_file = sd_read_full_file;
     sd_card->read_line = sd_read_line;
-    sd_card->write_file = sd_write_file;
+    sd_card->write_str_file = sd_write_file;
+    sd_card->write_data_file = sd_write_data_file;
     sd_card->unmount = sd_unmount;
 }

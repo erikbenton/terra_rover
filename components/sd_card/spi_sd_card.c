@@ -85,6 +85,24 @@ static esp_err_t sd_read_line(sd_card_t *self, const char *path)
     return ESP_OK;
 }
 
+static esp_err_t sd_write_data_file(sd_card_t *self, const char *path, const void *data, size_t data_len)
+{
+    FILE *file = fopen(path, "w");
+
+    if (file == NULL)
+    {
+        perror("error opening file");
+        ESP_LOGE(TAG, "Unable to get a file handle to write to.");
+        fclose(file);
+        return ESP_FAIL;
+    }
+
+    fwrite(data, sizeof(uint8_t), data_len, file);
+    fclose(file);
+
+    return ESP_OK;
+}
+
 static esp_err_t sd_unmount(sd_card_t *self)
 {
     return esp_vfs_fat_sdcard_unmount(BASE_PATH, self->card);
@@ -96,6 +114,7 @@ void spi_sd_card_create(sd_card_t *sd_card, void *ctx)
     sd_card->init = init_spi_sd_card;
     sd_card->read_full_file = sd_read_full_file;
     sd_card->read_line = sd_read_line;
-    sd_card->write_file = sd_write_file;
+    sd_card->write_str_file = sd_write_file;
+    sd_card->write_data_file = sd_write_data_file;
     sd_card->unmount = sd_unmount;
 }
