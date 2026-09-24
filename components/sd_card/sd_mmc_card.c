@@ -122,10 +122,11 @@ static esp_err_t sd_write_data_file(sd_card_t *self, const char *path, const voi
     return ESP_OK;
 }
 
-static esp_err_t sd_stream_web_files(sd_card_t *self, httpd_req_t *req)
+static esp_err_t sd_stream_web_files(sd_card_t *self, const char *base_dir, const char *base_path, httpd_req_t *req)
 {
     char path[600];
-    sprintf(path, "/store/site%s", req->uri);
+    sprintf(path, "/store/%s%s%s", base_dir, base_path[0] == '/' ? "" : "/", base_path);
+    ESP_LOGI(TAG, "Site path: %s", path);
 
     char *ext = strrchr(req->uri, '.');
 

@@ -36,12 +36,9 @@ void app_main(void)
             CONFIG_WIFI_PASSWORD,
             10000));
 
-    // init the server with sd card for site files
-    server_init(&sd_card);
+    server_init(&sd_card, &camera);
 
     // quick tests
-    sd_card.write_str_file(&sd_card, "/store/text.txt", "Hello, Terra!");
-    sd_card.read_line(&sd_card, "/store/text.txt");
-    take_photo(&camera, &sd_card, "/store/first.jpg");
-    take_photo(&camera, &sd_card, "/store/second.jpg");
+    take_photo(&camera, &sd_card, "/store/photos/first.jpg");
+    take_photo(&camera, &sd_card, "/store/photos/second.jpg");
 }
