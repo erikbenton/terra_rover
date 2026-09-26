@@ -30,11 +30,10 @@ void app_main(void)
     wifi_connect_init();
 
     // Configure the Wifi SSID and password in the menuconfig
-    ESP_ERROR_CHECK(
-        wifi_connect_sta(
-            CONFIG_WIFI_SSID,
-            CONFIG_WIFI_PASSWORD,
-            10000));
+    wifi_connect_sta(
+        CONFIG_WIFI_SSID,
+        CONFIG_WIFI_PASSWORD,
+        10000);
 
     server_init(&sd_card, &camera);
 

@@ -55,7 +55,6 @@ static esp_err_t take_photo(camera_t *camera, sd_card_t *sd_card, const char *ph
         return err;
     }
 
-    ESP_LOGI(TAG, "Finished taking photo");
     return ESP_OK;
 }
 

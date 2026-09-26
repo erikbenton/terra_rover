@@ -51,16 +51,16 @@ static esp_err_t init_camera(void)
         .pixel_format = PIXFORMAT_JPEG,
         .frame_size = FRAMESIZE_UXGA,
         .jpeg_quality = 5,
-        .fb_count = 1,
+        .fb_count = 2,
         .fb_location = CAMERA_FB_IN_PSRAM,
-        .grab_mode = CAMERA_GRAB_WHEN_EMPTY};
+        .grab_mode = CAMERA_GRAB_LATEST};
 
     return esp_camera_init(&camera_config);
 }
 
 static esp_err_t grab_photo(camera_t *self)
 {
-    ESP_LOGI(TAG, "Taking photo");
+    ESP_LOGI(TAG, "Started taking photo");
 
     self->current_photo = esp_camera_fb_get();
 
@@ -82,6 +82,7 @@ static esp_err_t release_photo(camera_t *self)
     }
 
     esp_camera_fb_return(self->current_photo);
+    ESP_LOGI(TAG, "Finished taking photo");
     return ESP_OK;
 }
 
