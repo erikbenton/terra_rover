@@ -6,6 +6,7 @@
 #include "wifi_connect.h"
 #include "nvs_flash.h"
 #include "server.h"
+#include "memory_utils.h"
 
 sd_card_t sd_card;
 camera_t camera;
@@ -40,4 +41,9 @@ void app_main(void)
     // quick tests
     take_photo(&camera, &sd_card, "/store/photos/first.jpg");
     take_photo(&camera, &sd_card, "/store/photos/second.jpg");
+
+#ifdef CONFIG_HEAP_MEM_DEBUG
+    create_heap_status_log_timer(CONFIG_HEAP_MEM_PERIOD);
+    start_heap_status_log_timer();
+#endif
 }
