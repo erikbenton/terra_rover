@@ -9,6 +9,8 @@
 #define PHOTO_NAME_LEN 200
 #define PHOTO_PATH_LEN 255
 
+#define ROVER_CMD_LEN 255
+
 static const char *TAG = "SITE";
 static httpd_handle_t server = NULL;
 static sd_card_t *sd_card;
@@ -20,6 +22,92 @@ void start_mdns_service(void)
         mdns_init());
     mdns_hostname_set("terra");
     mdns_instance_name_set("Terra Rover");
+}
+
+static void send_error_message(httpd_req_t *req, const char *error_message)
+{
+    cJSON *error_json = cJSON_CreateObject();
+    cJSON_AddStringToObject(error_json, "error_message", error_message);
+    char *error_string = cJSON_Print(error_json);
+    httpd_resp_set_status(req, HTTPD_400);
+    httpd_resp_send(req, error_string, HTTPD_RESP_USE_STRLEN);
+    cJSON_Delete(error_json);
+    httpd_resp_send(req, NULL, 0);
+}
+
+static esp_err_t on_rover_cmd_url(httpd_req_t *req)
+{
+    esp_err_t err = ESP_OK;
+
+    ESP_LOGI(TAG, "URL: %s", req->uri);
+
+    // buffer to hold the body
+    char buffer[ROVER_CMD_LEN];
+    memset(buffer, 0, sizeof(buffer));
+
+    if (req->content_len < ROVER_CMD_LEN)
+    {
+        // put the req into the buffer
+        httpd_req_recv(req, buffer, req->content_len);
+
+        // Get the cmd from the body
+        cJSON *payload = cJSON_Parse(buffer);
+
+        if (payload != NULL)
+        {
+            // get the desired direction (and maybe power later?)
+            cJSON *direction_json = cJSON_GetObjectItem(payload, "direction");
+            const char *direction = cJSON_GetStringValue(direction_json);
+
+            if (strcmp(direction, "right") == 0)
+            {
+                // go right
+                ESP_LOGI(TAG, "going right!");
+            }
+            else if (strcmp(direction, "left") == 0)
+            {
+                // go left
+                ESP_LOGI(TAG, "going left!");
+            }
+            else if (strcmp(direction, "forward") == 0)
+            {
+                // go forward
+                ESP_LOGI(TAG, "going forward!");
+            }
+            else if (strcmp(direction, "back") == 0)
+            {
+                // go back
+                ESP_LOGI(TAG, "going back!");
+            }
+            else if (strcmp(direction, "stop") == 0)
+            {
+                // stop
+                ESP_LOGI(TAG, "stopping");
+            }
+            else
+            {
+                // received an invalid direction
+                err = ESP_ERR_INVALID_RESPONSE;
+                ESP_LOGW(TAG, "Rover direction: \'%s\' is not recognized", direction);
+            }
+        }
+
+        cJSON_Delete(payload);
+    }
+
+    if (err == ESP_OK)
+    {
+        // send no content response
+        httpd_resp_set_status(req, HTTPD_204);
+        httpd_resp_send(req, NULL, 0);
+    }
+    else
+    {
+        // send an error message
+        send_error_message(req, "Rover direction not recognized.");
+    }
+
+    return err;
 }
 
 static esp_err_t take_photo(camera_t *camera, sd_card_t *sd_card, const char *photo_name)
@@ -132,6 +220,11 @@ void server_init(sd_card_t *sd_card_ptr, camera_t *camera_ptr)
 
     ESP_ERROR_CHECK(httpd_start(&server, &config));
 
+    httpd_uri_t rover_cmd_url = {
+        .uri = "/api/rover",
+        .method = HTTP_POST,
+        .handler = on_rover_cmd_url};
+
     httpd_uri_t take_photo_url = {
         .uri = "/api/takephoto",
         .method = HTTP_POST,
@@ -147,6 +240,7 @@ void server_init(sd_card_t *sd_card_ptr, camera_t *camera_ptr)
         .method = HTTP_GET,
         .handler = on_default_url};
 
+    httpd_register_uri_handler(server, &rover_cmd_url);
     httpd_register_uri_handler(server, &take_photo_url);
     httpd_register_uri_handler(server, &get_photo_url);
     httpd_register_uri_handler(server, &default_url);

@@ -39,3 +39,7 @@
     height: 48px;
   }
 }
+
+.rover-controls {
+  display: flex;
+}

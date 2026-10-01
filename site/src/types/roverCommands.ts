@@ -1,0 +1,1 @@
+export type RoverCommand = ('forward' | 'left' | 'right' | 'back' | 'stop');

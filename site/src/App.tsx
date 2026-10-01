@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
-import takePhoto from './requests/photos';
+import { takePhoto } from './requests/photos';
+import type { RoverCommand } from './types/roverCommands';
+import { sendRoverCommand } from './requests/roverCommands';
 
 function App() {
   const [photoName, setPhotoName] = useState<string | null>(null);
@@ -10,6 +12,13 @@ function App() {
     const resp = await takePhoto(photoName ?? "no_name");
     setPhoto(resp.photo_name);
     setPhotoName(null);
+  }
+
+  const sendCommand = async (direction: RoverCommand) => {
+    const resp = await sendRoverCommand(direction);
+    if (!resp) {
+      console.log(`Error sending direction: ${direction}`);
+    }
   }
 
   return (
@@ -27,6 +36,28 @@ function App() {
           snap
         </button>
       </section>
+
+      <section className='rover-controls'>
+        <div>
+          <button id='forward-button' onClick={() => sendCommand('forward')}>
+            Forward
+          </button>
+        </div>
+        <div>
+          <button id='left-button' onClick={() => sendCommand('left')}>
+            Left
+          </button>
+          <button id='right-button' onClick={() => sendCommand('right')}>
+            Right
+          </button>
+        </div>
+        <div>
+          <button id='back-button' onClick={() => sendCommand('back')}>
+            Back
+          </button>
+        </div>
+      </section>
+
       {photo !== null &&
         <img className='terra-photo' src={`http://terra.local/api/photos/${photo}.jpg`} />
       }

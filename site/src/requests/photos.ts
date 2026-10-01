@@ -1,7 +1,7 @@
 import type TakePhotoResponse from "../types/takePhotoResponse";
 
 
-export default async function takePhoto(photo_name: string): Promise<TakePhotoResponse> {
+export async function takePhoto(photo_name: string): Promise<TakePhotoResponse> {
   const config = {
     method: 'POST',
     headers: {
