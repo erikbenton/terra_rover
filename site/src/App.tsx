@@ -38,23 +38,25 @@ function App() {
       </section>
 
       <section className='rover-controls'>
-        <div>
-          <button id='forward-button' onClick={() => sendCommand('forward')}>
-            Forward
-          </button>
-        </div>
-        <div>
-          <button id='left-button' onClick={() => sendCommand('left')}>
-            Left
-          </button>
-          <button id='right-button' onClick={() => sendCommand('right')}>
-            Right
-          </button>
-        </div>
-        <div>
-          <button id='back-button' onClick={() => sendCommand('back')}>
-            Back
-          </button>
+        <div className='control-box'>
+          <div className='row centered'>
+            <button className='direction-btn' id='forward-button' onClick={() => sendCommand('forward')}>
+              Forward
+            </button>
+          </div>
+          <div className='row evenly-split'>
+            <button className='direction-btn' id='left-button' onClick={() => sendCommand('left')}>
+              Left
+            </button>
+            <button className='direction-btn' id='right-button' onClick={() => sendCommand('right')}>
+              Right
+            </button>
+          </div>
+          <div className='row centered'>
+            <button className='direction-btn' id='back-button' onClick={() => sendCommand('back')}>
+              Back
+            </button>
+          </div>
         </div>
       </section>
 
