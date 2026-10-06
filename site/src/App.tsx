@@ -6,7 +6,7 @@ import { sendRoverCommand } from './requests/roverCommands';
 
 function App() {
   const [photoName, setPhotoName] = useState<string | null>(null);
-  const [photo, setPhoto] = useState('first');
+  const [photo, setPhoto] = useState<string | null>(null);
 
   const handleTakePhoto = async () => {
     const resp = await takePhoto(photoName ?? "no_name");

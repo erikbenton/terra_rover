@@ -11,14 +11,6 @@
 sd_card_t sd_card;
 camera_t camera;
 
-void take_photo(camera_t *camera, sd_card_t *sd_card, const char *photo_path)
-{
-    camera->grab_photo(camera);
-    sd_card->write_data_file(sd_card, photo_path, camera->current_photo->buf, camera->current_photo->len);
-    camera->release_photo(camera);
-    ESP_LOGI("MAIN", "Finished taking photo");
-}
-
 void app_main(void)
 {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -37,10 +29,6 @@ void app_main(void)
         10000);
 
     server_init(&sd_card, &camera);
-
-    // quick tests
-    take_photo(&camera, &sd_card, "/store/photos/first.jpg");
-    take_photo(&camera, &sd_card, "/store/photos/second.jpg");
 
 #ifdef CONFIG_HEAP_MEM_DEBUG
     create_heap_status_log_timer(CONFIG_HEAP_MEM_PERIOD);
