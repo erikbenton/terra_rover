@@ -9,7 +9,8 @@ function App() {
   const [photo, setPhoto] = useState<string | null>(null);
 
   const handleTakePhoto = async () => {
-    const resp = await takePhoto(photoName ?? "no_name");
+    const parsedName = photoName?.split(' ').join('_');
+    const resp = await takePhoto(parsedName ?? "no_name");
     setPhoto(resp.photo_name);
     setPhotoName(null);
   }
