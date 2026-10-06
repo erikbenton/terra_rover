@@ -6,12 +6,16 @@
 
 typedef struct CAMERA_STRUCT camera_t;
 
+typedef esp_err_t (*init_camera_t)(void);
+typedef esp_err_t (*grab_photo_t)(camera_t *self);
+typedef esp_err_t (*release_photo_t)(camera_t *self);
+
 struct CAMERA_STRUCT
 {
-    camera_fb_t *current_photo;                 // current photo from frame buffer
-    esp_err_t (*init)(void);                    // initialize camera
-    esp_err_t (*grab_photo)(camera_t *self);    // get the current photo from the frame buffer
-    esp_err_t (*release_photo)(camera_t *self); // release the current photo from the frame buffer
+    camera_fb_t *current_photo;    // current photo from frame buffer
+    init_camera_t init;            // initialize camera
+    grab_photo_t grab_photo;       // get the current photo from the frame buffer
+    release_photo_t release_photo; // release the current photo from the frame buffer
     void *ctx;
 };
 
